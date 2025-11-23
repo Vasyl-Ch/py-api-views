@@ -22,8 +22,12 @@ class MovieSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["actors"] = list(instance.actors.values_list("id", flat=True))
-        representation["genres"] = list(instance.genres.values_list("id", flat=True))
+        representation["actors"] = list(
+            instance.actors.values_list("id", flat=True)
+        )
+        representation["genres"] = list(
+            instance.genres.values_list("id", flat=True)
+        )
         return representation
 
     def create(self, validated_data):
@@ -44,8 +48,13 @@ class MovieSerializer(serializers.Serializer):
         genres_data = validated_data.pop("genres", None)
 
         instance.title = validated_data.get("title", instance.title)
-        instance.description = validated_data.get("description", instance.description)
-        instance.duration = validated_data.get("duration", instance.duration)
+        instance.description = validated_data.get(
+            "description",
+            instance.description
+        )
+        instance.duration = validated_data.get(
+            "duration", instance.duration
+        )
 
         instance.save()
 
