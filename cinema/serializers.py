@@ -13,11 +13,17 @@ class MovieSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     description = serializers.CharField()
     duration = serializers.IntegerField()
-    actors = serializers.ListField(
-        child=serializers.IntegerField(), required=False, write_only=True
+    actors = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Actor.objects.all(),
+        required=False,
+        write_only=True
     )
-    genres = serializers.ListField(
-        child=serializers.IntegerField(), required=False, write_only=True
+    genres = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Genre.objects.all(),
+        required=False,
+        write_only=True
     )
 
     def to_representation(self, instance):
