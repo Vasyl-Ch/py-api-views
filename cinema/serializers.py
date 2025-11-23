@@ -13,19 +13,46 @@ class MovieSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     description = serializers.CharField()
     duration = serializers.IntegerField()
+    actors = serializers.ListField(
+        child=serializers.IntegerField(), required=False, write_only=True
+    )
+    genres = serializers.ListField(
+        child=serializers.IntegerField(), required=False, write_only=True
+    )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["actors"] = list(instance.actors.values_list("id", flat=True))
+        representation["genres"] = list(instance.genres.values_list("id", flat=True))
+        return representation
 
     def create(self, validated_data):
-        return Movie.objects.create(**validated_data)
+        actors_data = validated_data.pop("actors", [])
+        genres_data = validated_data.pop("genres", [])
+
+        movie = Movie.objects.create(**validated_data)
+
+        if actors_data:
+            movie.actors.set(actors_data)
+        if genres_data:
+            movie.genres.set(genres_data)
+
+        return movie
 
     def update(self, instance, validated_data):
+        actors_data = validated_data.pop("actors", None)
+        genres_data = validated_data.pop("genres", None)
+
         instance.title = validated_data.get("title", instance.title)
-        instance.description = validated_data.get(
-            "description",
-            instance.description
-        )
+        instance.description = validated_data.get("description", instance.description)
         instance.duration = validated_data.get("duration", instance.duration)
 
         instance.save()
+
+        if actors_data is not None:
+            instance.actors.set(actors_data)
+        if genres_data is not None:
+            instance.genres.set(genres_data)
 
         return instance
 
